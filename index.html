@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Download media you own from a direct Instagram media URL." />
+  <title>Instasnap - save the original</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="shell">
+    <nav class="nav">
+      <a class="wordmark" href="./" aria-label="Instasnap home"><span class="wordmark-mark">/</span>instasnap</a>
+      <div class="nav-note"><span class="live-dot"></span> local-first utility</div>
+    </nav>
+
+    <section class="hero" aria-labelledby="page-title">
+      <div class="hero-copy">
+        <p class="eyebrow">01 / original media utility</p>
+        <h1 id="page-title">Save the<br><em>real</em> thing.</h1>
+        <p class="lede">Paste a direct media link. Keep the original file, without the screenshot shuffle.</p>
+      </div>
+      <div class="hero-stamp" aria-hidden="true">
+        <span>IS</span>
+        <small>ORIGINAL<br>QUALITY</small>
+      </div>
+    </section>
+
+    <section class="download-panel" aria-labelledby="download-title">
+      <div class="panel-topline">
+        <p id="download-title">Drop a link</p>
+        <span class="mono-label">MP4 / JPG / PNG / WEBP</span>
+      </div>
+      <form id="download-form" novalidate>
+        <div class="input-row">
+          <label class="sr-only" for="url-input">Instagram or direct media URL</label>
+          <input id="url-input" name="url" type="url" autocomplete="url" placeholder="https://www.instagram.com/..." spellcheck="false" required />
+          <button class="primary-button" type="submit"><span>Fetch media</span><span aria-hidden="true">&#8599;</span></button>
+        </div>
+        <p id="form-message" class="form-message" role="status"></p>
+      </form>
+      <div class="panel-footnote">
+        <span class="footnote-icon">i</span>
+        <span>Works with direct media URLs. For Instagram posts, use a media URL you own or have permission to download.</span>
+      </div>
+    </section>
+
+    <section id="result-card" class="result-card is-hidden" aria-live="polite">
+      <div class="result-preview" id="result-preview">
+        <div class="preview-placeholder"><span class="preview-cross">+</span><span id="preview-type">MEDIA PREVIEW</span></div>
+      </div>
+      <div class="result-details">
+        <div class="result-heading">
+          <div>
+            <p class="eyebrow">02 / found it</p>
+            <h2 id="result-title">Your media is ready.</h2>
+          </div>
+          <span class="file-badge" id="file-badge">FILE</span>
+        </div>
+        <p id="result-description" class="result-description"></p>
+        <div class="result-meta"><span id="result-host">SOURCE</span><span id="result-format">MEDIA</span></div>
+        <a id="save-button" class="save-button" href="#" download><span>Save original</span><span aria-hidden="true">&#8595;</span></a>
+      </div>
+    </section>
+
+    <section class="recent-section" aria-labelledby="recent-title">
+      <div class="section-heading"><h2 id="recent-title">Recent links</h2><span class="mono-label">THIS DEVICE ONLY</span></div>
+      <div id="recent-list" class="recent-list">
+        <p class="empty-state">Your last three links will appear here.</p>
+      </div>
+    </section>
+
+    <footer class="footer"><span>INSTASNAP / 2026</span><span>Only download content you have rights to use.</span></footer>
+  </main>
+  <script src="script.js"></script>
+</body>
+</html>
