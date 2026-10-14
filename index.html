@@ -3,78 +3,115 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Download media you own from a direct Instagram media URL." />
-  <title>Instasnap - save the original</title>
+  <meta name="description" content="Download Instagram reels in HD. Paste a reel link and save the video to your phone or computer. No login, no app, no watermark." />
+  <title>IGSaver - Download Instagram Reels in HD</title>
+  <link rel="icon" href="assets/image_3c91fefb.jpg" />
+  <link rel="apple-touch-icon" href="assets/image_3c91fefb.jpg" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <main class="shell">
-    <nav class="nav">
-      <a class="wordmark" href="./" aria-label="Instasnap home"><span class="wordmark-mark">/</span>instasnap</a>
-      <div class="nav-note"><span class="live-dot"></span> local-first utility</div>
-    </nav>
+  <header class="site-header">
+    <div class="shell header-inner">
+      <a class="brand" href="./" aria-label="IGSaver home">
+        <img class="brand-icon" src="assets/image_3c91fefb.jpg" alt="" width="40" height="40" />
+        <span class="brand-name">IGSaver</span>
+      </a>
+    </div>
+  </header>
 
-    <section class="hero" aria-labelledby="page-title">
-      <div class="hero-copy">
-        <p class="eyebrow">01 / original media utility</p>
-        <h1 id="page-title">Save the<br><em>real</em> thing.</h1>
-        <p class="lede">Paste a direct media link. Keep the original file, without the screenshot shuffle.</p>
-      </div>
-      <div class="hero-stamp" aria-hidden="true">
-        <span>IS</span>
-        <small>ORIGINAL<br>QUALITY</small>
-      </div>
-    </section>
+  <main>
+    <section class="hero">
+      <div class="shell hero-inner">
+        <h1>Download Instagram Reels in <span class="gradient-text">HD</span></h1>
+        <p class="lede">Paste a reel link and save the video to your phone or computer. No login, no app, no watermark.</p>
 
-    <section class="download-panel" aria-labelledby="download-title">
-      <div class="panel-topline">
-        <p id="download-title">Drop a link</p>
-        <span class="mono-label">MP4 / JPG / PNG / WEBP</span>
-      </div>
-      <form id="download-form" novalidate>
-        <div class="input-row">
-          <label class="sr-only" for="url-input">Instagram or direct media URL</label>
-          <input id="url-input" name="url" type="url" autocomplete="url" placeholder="https://www.instagram.com/..." spellcheck="false" required />
-          <button class="primary-button" type="submit"><span>Fetch media</span><span aria-hidden="true">&#8599;</span></button>
-        </div>
-        <p id="form-message" class="form-message" role="status"></p>
-      </form>
-      <div class="panel-footnote">
-        <span class="footnote-icon">i</span>
-        <span>Works with direct media URLs. For Instagram posts, use a media URL you own or have permission to download.</span>
-      </div>
-    </section>
-
-    <section id="result-card" class="result-card is-hidden" aria-live="polite">
-      <div class="result-preview" id="result-preview">
-        <div class="preview-placeholder"><span class="preview-cross">+</span><span id="preview-type">MEDIA PREVIEW</span></div>
-      </div>
-      <div class="result-details">
-        <div class="result-heading">
-          <div>
-            <p class="eyebrow">02 / found it</p>
-            <h2 id="result-title">Your media is ready.</h2>
+        <form id="download-form" class="download-form" novalidate>
+          <label class="sr-only" for="url-input">Instagram reel link</label>
+          <div class="input-row">
+            <input id="url-input" name="url" type="url" inputmode="url" autocomplete="off" placeholder="Paste Instagram reel link…" spellcheck="false" required />
+            <button id="fetch-button" class="fetch-button" type="submit">Download</button>
           </div>
-          <span class="file-badge" id="file-badge">FILE</span>
+          <p id="form-message" class="form-message" role="status"></p>
+        </form>
+
+        <section id="result-card" class="result-card" hidden aria-live="polite">
+          <div class="result-video">
+            <video id="result-video" controls playsinline preload="metadata"></video>
+          </div>
+          <div class="result-actions">
+            <p class="result-title">Your reel is ready</p>
+            <p id="result-hint" class="result-hint"></p>
+            <button id="save-button" class="save-button" type="button">Download video</button>
+            <button id="another-button" class="another-button" type="button">Download another</button>
+          </div>
+        </section>
+
+        <ul class="features">
+          <li>No login required</li>
+          <li>HD quality, no watermark</li>
+          <li>Any public reel</li>
+          <li>Free to use</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="content">
+      <div class="shell prose">
+        <h2>How to download an Instagram reel</h2>
+        <p>Open the reel you want in the Instagram app or on the web, tap the share icon, and choose “Copy link”.</p>
+        <p>Paste that link into the box above and press Download. The reel’s video is fetched and saved straight to your device in its original HD quality.</p>
+        <p>It works the same on iPhone, Android, and desktop — nothing to install, no account to connect.</p>
+
+        <h2>Why download reels with this tool</h2>
+        <p><strong>No login:</strong> you never hand over your Instagram credentials, so there is nothing to compromise.</p>
+        <p><strong>HD, no watermark:</strong> the file is the original upload, not a re-encoded screen recording with a logo stamped on it.</p>
+        <p><strong>Any public reel:</strong> save clips from creators, brands, or friends whose account is public.</p>
+
+        <h2>Can you download a reel anonymously?</h2>
+        <p>Yes. Downloading a public reel does not notify the person who posted it. Instagram does not tell creators who saved their video, and this tool never interacts with your account or theirs.</p>
+        <p>Private accounts are different: if a reel is on a private account you do not follow, there is no legitimate way to download it — and this tool will not pretend otherwise.</p>
+      </div>
+    </section>
+
+    <section class="faq">
+      <div class="shell">
+        <h2>Frequently asked questions</h2>
+        <div class="faq-list">
+          <details>
+            <summary>Is downloading Instagram reels free?</summary>
+            <p>Yes. Pasting a public reel link and saving the video is free, with no daily cap and no account required.</p>
+          </details>
+          <details>
+            <summary>Will the person know I downloaded their reel?</summary>
+            <p>No. Instagram does not notify anyone when their public reel is downloaded, and this tool never touches your account or theirs.</p>
+          </details>
+          <details>
+            <summary>Can I download reels from a private account?</summary>
+            <p>No. If a reel is on a private account you do not follow, there is no legitimate way to download it. This tool only works with public reels.</p>
+          </details>
+          <details>
+            <summary>Does the download include a watermark?</summary>
+            <p>No. You get the original HD video file the creator uploaded, without any added logo or watermark.</p>
+          </details>
+          <details>
+            <summary>Can I download reels on iPhone and Android?</summary>
+            <p>Yes. It runs in the browser, so it works the same on iPhone, Android, and desktop with nothing to install.</p>
+          </details>
         </div>
-        <p id="result-description" class="result-description"></p>
-        <div class="result-meta"><span id="result-host">SOURCE</span><span id="result-format">MEDIA</span></div>
-        <a id="save-button" class="save-button" href="#" download><span>Save original</span><span aria-hidden="true">&#8595;</span></a>
       </div>
     </section>
-
-    <section class="recent-section" aria-labelledby="recent-title">
-      <div class="section-heading"><h2 id="recent-title">Recent links</h2><span class="mono-label">THIS DEVICE ONLY</span></div>
-      <div id="recent-list" class="recent-list">
-        <p class="empty-state">Your last three links will appear here.</p>
-      </div>
-    </section>
-
-    <footer class="footer"><span>INSTASNAP / 2026</span><span>Only download content you have rights to use.</span></footer>
   </main>
+
+  <footer class="site-footer">
+    <div class="shell footer-inner">
+      <span>© 2026 IGSaver</span>
+      <span>Not affiliated with Instagram. Only download content you have the right to use.</span>
+    </div>
+  </footer>
+
   <script src="script.js"></script>
 </body>
 </html>

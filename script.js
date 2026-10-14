@@ -1,168 +1,125 @@
 const form = document.querySelector('#download-form');
 const input = document.querySelector('#url-input');
+const fetchButton = document.querySelector('#fetch-button');
 const message = document.querySelector('#form-message');
 const resultCard = document.querySelector('#result-card');
-const resultPreview = document.querySelector('#result-preview');
-const previewType = document.querySelector('#preview-type');
-const resultDescription = document.querySelector('#result-description');
-const resultHost = document.querySelector('#result-host');
-const resultFormat = document.querySelector('#result-format');
-const fileBadge = document.querySelector('#file-badge');
+const resultVideo = document.querySelector('#result-video');
+const resultHint = document.querySelector('#result-hint');
 const saveButton = document.querySelector('#save-button');
-const recentList = document.querySelector('#recent-list');
-let previewObjectUrl;
+const anotherButton = document.querySelector('#another-button');
 
-const directMediaPattern = /\.(?:jpg|jpeg|png|webp|gif|mp4|mov|webm)(?:[?#].*)?$/i;
-const instagramPattern = /^https?:\/\/(?:www\.)?instagram\.com\//i;
-const recentKey = 'instasnap-recent-links';
+const instagramPattern = /^https?:\/\/(?:www\.|m\.)?instagram\.com\/(?:[\w.]+\/)?(?:reel|reels|p|tv)\/[\w-]+/i;
+const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent)
+  || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
+let currentFile;
+let currentObjectUrl;
 
 function setMessage(text, isError = false) {
   message.textContent = text;
   message.classList.toggle('error', isError);
 }
 
-function formatName(url) {
-  const path = new URL(url).pathname.split('/').filter(Boolean);
-  return path.at(-1) || 'instagram-media';
+function setFetching(isFetching) {
+  fetchButton.disabled = isFetching;
+  fetchButton.textContent = isFetching ? 'Fetching…' : 'Download';
+  input.readOnly = isFetching;
 }
 
-function addRecent(url) {
-  const items = JSON.parse(localStorage.getItem(recentKey) || '[]').filter(item => item !== url);
-  items.unshift(url);
-  localStorage.setItem(recentKey, JSON.stringify(items.slice(0, 3)));
-  renderRecent();
+function filenameFrom(response) {
+  const header = response.headers.get('Content-Disposition') || '';
+  const match = header.match(/filename="?([^";]+)"?/i);
+  return match ? match[1] : 'igsaver-reel.mp4';
 }
 
-function renderRecent() {
-  const items = JSON.parse(localStorage.getItem(recentKey) || '[]');
-  if (!items.length) {
-    recentList.innerHTML = '<p class="empty-state">Your last three links will appear here.</p>';
-    return;
+function clearResult() {
+  if (currentObjectUrl) URL.revokeObjectURL(currentObjectUrl);
+  currentObjectUrl = undefined;
+  currentFile = undefined;
+  resultVideo.removeAttribute('src');
+  resultVideo.load();
+  resultCard.hidden = true;
+}
+
+function canShareFile(file) {
+  return isMobile && navigator.canShare && navigator.canShare({ files: [file] });
+}
+
+function showResult(file) {
+  currentFile = file;
+  currentObjectUrl = URL.createObjectURL(file);
+  resultVideo.src = currentObjectUrl;
+  resultHint.textContent = canShareFile(file)
+    ? 'Tap Download video, then choose “Save Video” to add it to your Photos.'
+    : 'Tap the video to preview it, then save it to your device.';
+  resultCard.hidden = false;
+}
+
+async function fetchReel(url) {
+  const response = await fetch(`/api/download?url=${encodeURIComponent(url)}`);
+  if (!response.ok) {
+    let error = 'The reel could not be downloaded.';
+    try { error = (await response.json()).error || error; } catch {}
+    throw new Error(error);
   }
-  recentList.innerHTML = items.map(url => {
-    const host = new URL(url).hostname.replace(/^www\./, '');
-    return `<div class="recent-item"><span title="${url}">${url}</span><small>${host}</small></div>`;
-  }).join('');
+  const blob = await response.blob();
+  return new File([blob], filenameFrom(response), { type: blob.type || 'video/mp4' });
 }
 
-function clearPreviewObjectUrl() {
-  if (previewObjectUrl) {
-    URL.revokeObjectURL(previewObjectUrl);
-    previewObjectUrl = undefined;
-  }
+function downloadToDevice(file) {
+  const link = document.createElement('a');
+  link.href = currentObjectUrl;
+  link.download = file.name;
+  document.body.append(link);
+  link.click();
+  link.remove();
 }
 
-function showVideoPreview(src, label = 'VIDEO PREVIEW') {
-  clearPreviewObjectUrl();
-  resultPreview.innerHTML = `<video controls playsinline preload="metadata" src="${src}"></video>`;
-  previewType.textContent = label;
-}
-
-function showDirectMedia(url) {
-  const parsed = new URL(url);
-  const extension = (parsed.pathname.match(/\.([a-z0-9]+)$/i) || [,'media'])[1].toUpperCase();
-  const isImage = /^(JPG|JPEG|PNG|WEBP|GIF)$/.test(extension);
-  if (isImage) {
-    clearPreviewObjectUrl();
-    resultPreview.innerHTML = `<img src="${url}" alt="Media preview" />`;
-    previewType.textContent = `${extension} PREVIEW`;
-  } else {
-    showVideoPreview(url, `${extension} PREVIEW`);
-  }
-  resultDescription.textContent = `A direct ${extension} file was found. The save action below keeps the source URL intact. If the host blocks browser downloads, open the source and save it from there.`;
-  resultHost.textContent = parsed.hostname.replace(/^www\./, '');
-  resultFormat.textContent = extension;
-  fileBadge.textContent = extension;
-  saveButton.href = url;
-  saveButton.download = formatName(url);
-  saveButton.removeAttribute('aria-disabled');
-  saveButton.onclick = null;
-  resultCard.classList.remove('is-hidden');
-}
-
-function showInstagramLink(url) {
-  resultPreview.innerHTML = '<div class="preview-placeholder"><span class="preview-cross">+</span><span>LINK RECEIVED</span></div>';
-  previewType.textContent = 'INSTAGRAM LINK';
-  resultDescription.textContent = 'Resolving the public media file. This can take a moment, and only works for content you own or have permission to download.';
-  resultHost.textContent = 'instagram.com';
-  resultFormat.textContent = 'POST LINK';
-  fileBadge.textContent = 'LINK';
-  saveButton.removeAttribute('href');
-  saveButton.removeAttribute('download');
-  saveButton.setAttribute('aria-disabled', 'true');
-  saveButton.onclick = event => {
-    event.preventDefault();
-    resolveInstagramMedia(url);
-  };
-  resultCard.classList.remove('is-hidden');
-}
-
-async function resolveInstagramMedia(url) {
-  saveButton.classList.add('is-loading');
-  saveButton.querySelector('span').textContent = 'Resolving...';
-  setMessage('Downloading the original media...');
-  try {
-    const response = await fetch(`/api/download?url=${encodeURIComponent(url)}`);
-    if (!response.ok) {
-      const payload = await response.json();
-      throw new Error(payload.error || 'The media could not be downloaded.');
-    }
-    const blob = await response.blob();
-    const objectUrl = URL.createObjectURL(blob);
-    if (blob.type.startsWith('video/')) {
-      showVideoPreview(objectUrl);
-      previewObjectUrl = objectUrl;
-      resultFormat.textContent = blob.type.split('/')[1].toUpperCase();
-      fileBadge.textContent = 'VIDEO';
-      resultDescription.textContent = 'Your video is ready to preview. Use the player controls below, then save the original file.';
-    } else if (blob.type.startsWith('image/')) {
-      clearPreviewObjectUrl();
-      resultPreview.innerHTML = `<img src="${objectUrl}" alt="Downloaded media preview" />`;
-      previewObjectUrl = objectUrl;
-      previewType.textContent = 'IMAGE PREVIEW';
-      resultFormat.textContent = blob.type.split('/')[1].toUpperCase();
-      fileBadge.textContent = 'IMAGE';
-    }
-    const link = document.createElement('a');
-    link.href = objectUrl;
-    link.download = 'instasnap-media';
-    link.click();
-    setMessage('Download started.');
-  } catch (error) {
-    setMessage(error.message, true);
-  } finally {
-    saveButton.classList.remove('is-loading');
-    saveButton.querySelector('span').textContent = 'Save original';
-  }
-}
-
-form.addEventListener('submit', event => {
+form.addEventListener('submit', async event => {
   event.preventDefault();
+  if (fetchButton.disabled) return;
   const value = input.value.trim();
-  let url;
-  try {
-    url = new URL(value);
-    if (!['http:', 'https:'].includes(url.protocol)) throw new Error();
-  } catch {
-    setMessage('Enter a complete http(s) URL to continue.', true);
+  if (!instagramPattern.test(value)) {
+    setMessage('Paste a link to a public Instagram reel, like https://www.instagram.com/reel/…', true);
     input.focus();
     return;
   }
 
-  addRecent(url.href);
-  setMessage(directMediaPattern.test(url.pathname) ? 'Direct media found.' : 'Link received.');
-  if (directMediaPattern.test(url.pathname)) {
-    showDirectMedia(url.href);
-  } else if (instagramPattern.test(url.href)) {
-    showInstagramLink(url.href);
-  } else {
-    showDirectMedia(url.href);
-    resultDescription.textContent = 'This URL does not look like an Instagram post, but it can still be used when it points directly to a media file.';
+  clearResult();
+  setMessage('');
+  setFetching(true);
+  try {
+    showResult(await fetchReel(value));
+  } catch (error) {
+    setMessage(error.message, true);
+  } finally {
+    setFetching(false);
   }
+});
+
+saveButton.addEventListener('click', async () => {
+  if (!currentFile) return;
+  // On phones the share sheet is the only way a web page can put a video in
+  // the Photos/Gallery app ("Save Video" on iOS, "Save to device" on Android).
+  if (canShareFile(currentFile)) {
+    try {
+      await navigator.share({ files: [currentFile] });
+      return;
+    } catch (error) {
+      if (error.name === 'AbortError') return;
+    }
+  }
+  downloadToDevice(currentFile);
+});
+
+anotherButton.addEventListener('click', () => {
+  clearResult();
+  setMessage('');
+  input.value = '';
+  input.focus();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 });
 
 input.addEventListener('input', () => {
   if (message.classList.contains('error')) setMessage('');
 });
-
-renderRecent();
